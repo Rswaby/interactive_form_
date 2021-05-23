@@ -10,7 +10,9 @@ const focusOnElementById = id =>{
     console.log('focusing on element with id =', id);
     document.getElementById(id).focus();
 };
-
+const getElementById = id =>{
+    return document.getElementById(id);
+}
 const hideOrShowElementById = (id,action) =>{
     const element = document.getElementById(id);
 
@@ -29,7 +31,7 @@ hideOrShowElementById('other-job-role',HIDE);
 
 // Title section control
 
-const jobSection = document.getElementById('title');
+const jobSection = getElementById('title');
 
 jobSection.addEventListener('change',(e)=>{
     console.log('++++++++++++ Job Section ++++++++++++')
@@ -42,21 +44,34 @@ jobSection.addEventListener('change',(e)=>{
     }
 });
  
-const shirtDesigns = document.getElementById('shirt-designs');
-const designOptions = document.getElementById('color');
-// I ♥ JS
+const shirtDesigns = getElementById('shirt-designs');
+const designOptions = getElementById('color');
+
 shirtDesigns.addEventListener('change',(e)=>{
-    console.log('++++++++++++ shirt-designs ++++++++++++')
+    console.log('++++++++++++ shirt-designs ++++++++++++');
     let currentSelection = e.target.value;
-    console.log('current user shirt design selection : ', e.target);
     for (let option of designOptions){
-        if(option.dataset.theme = currentSelection){
-            // TODO: style.display = block etc
+        if(option.dataset.theme === currentSelection){
+            option.style.display = 'block';
         } else {
-            
+            option.style.display = 'none';
         }
     }
 });
 
+const activities = getElementById('activities');
+const displayTotal = getElementById('activities-cost');
+let currentCost = 0;
+
+activities.addEventListener('change',(e)=>{
+    console.log('++++++++++++ activites ++++++++++++');
+    const checkBox = e.target;
+    const isChecked = checkBox.checked;
+    // get current cost of activity 
+    const cost = +checkBox.getAttribute('data-cost');
+    displayTotal.innerHTML='';
+    isChecked ? currentCost += cost : currentCost -= cost;
+    displayTotal.innerHTML = `Total: $${currentCost}`;    
+});
 
 

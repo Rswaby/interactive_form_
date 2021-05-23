@@ -43,11 +43,19 @@ jobSection.addEventListener('change',(e)=>{
 });
  
 const shirtDesigns = document.getElementById('shirt-designs');
-
+const designOptions = document.getElementById('color');
+// I ♥ JS
 shirtDesigns.addEventListener('change',(e)=>{
     console.log('++++++++++++ shirt-designs ++++++++++++')
     let currentSelection = e.target.value;
-    console.log('current user shirt design selection : ', currentSelection);
+    console.log('current user shirt design selection : ', e.target);
+    for (let option of designOptions){
+        if(option.dataset.theme = currentSelection){
+            // TODO: style.display = block etc
+        } else {
+            
+        }
+    }
 });
 
 

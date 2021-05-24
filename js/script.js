@@ -1,10 +1,11 @@
 // Rohan Swaby
 // Interactive Form
-
-// define action 
+  
 const SHOW = 'show';
 const HIDE = 'hide';
-
+const CREDITCARD = 'credit-card';
+const PAYPAL = 'paypal';
+const BITCOIN = 'bitcoin';
 
 const focusOnElementById = id =>{
     console.log('focusing on element with id =', id);
@@ -25,13 +26,36 @@ const hideOrShowElementById = (id,action) =>{
     }
 };
 
+const determinePaymentMethod = paymentMethod => {
+    if(paymentMethod === PAYPAL){
+        hideOrShowElementById(PAYPAL,SHOW);
+        hideOrShowElementById(CREDITCARD,HIDE);
+        hideOrShowElementById(BITCOIN,HIDE);
+    } else if (paymentMethod === CREDITCARD){
+        hideOrShowElementById(PAYPAL,HIDE);
+        hideOrShowElementById(CREDITCARD,SHOW);
+        hideOrShowElementById(BITCOIN,HIDE);
+    } else if (paymentMethod === BITCOIN){
+        hideOrShowElementById(PAYPAL,HIDE);
+        hideOrShowElementById(CREDITCARD,HIDE);
+        hideOrShowElementById(BITCOIN,SHOW);
+    }
+}
+
 // defaults 
 focusOnElementById('name');
 hideOrShowElementById('other-job-role',HIDE);
+getElementById('payment').value = CREDITCARD;
+determinePaymentMethod(CREDITCARD);
 
 // Title section control
-
 const jobSection = getElementById('title');
+const shirtDesigns = getElementById('shirt-designs');
+const designOptions = getElementById('color');
+const activities = getElementById('activities');
+const displayTotal = getElementById('activities-cost');
+const payment = getElementById('payment');
+let currentCost = 0;
 
 jobSection.addEventListener('change',(e)=>{
     console.log('++++++++++++ Job Section ++++++++++++')
@@ -43,9 +67,6 @@ jobSection.addEventListener('change',(e)=>{
         hideOrShowElementById('other-job-role',HIDE);
     }
 });
- 
-const shirtDesigns = getElementById('shirt-designs');
-const designOptions = getElementById('color');
 
 shirtDesigns.addEventListener('change',(e)=>{
     console.log('++++++++++++ shirt-designs ++++++++++++');
@@ -59,10 +80,6 @@ shirtDesigns.addEventListener('change',(e)=>{
     }
 });
 
-const activities = getElementById('activities');
-const displayTotal = getElementById('activities-cost');
-let currentCost = 0;
-
 activities.addEventListener('change',(e)=>{
     console.log('++++++++++++ activites ++++++++++++');
     const checkBox = e.target;
@@ -74,4 +91,8 @@ activities.addEventListener('change',(e)=>{
     displayTotal.innerHTML = `Total: $${currentCost}`;    
 });
 
-
+payment.addEventListener('change',(e)=>{
+    console.log('++++++++++++ payment ++++++++++++');
+    const paymentMethod = e.target.value;
+    determinePaymentMethod(paymentMethod);
+});

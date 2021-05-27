@@ -12,9 +12,12 @@ const NAMEHINT = 'name-hint';
 const EMAILHINT = 'email-hint';
 const ACTIVITIESHINT = 'activities-hint';
 const CREDITCARDHINTS = {card:'cc-hint', zip:'zip-hint', cvv:'cvv-hint'};
-const STATE = { activitiesCost : 0, paymentMethod : CREDITCARD, };
+const STATE = { 
+    activitiesCost : 0, 
+    paymentMethod : CREDITCARD,
+};
 
-const focusOnElementById = id =>{
+const focusOnElementById = id => {
     console.log('focusing on element with id =', id);
     document.getElementById(id).focus();
 };
@@ -24,7 +27,7 @@ const getAllSubElements = (elementId, tag) => {
 const getElementById = id =>{
     return document.getElementById(id);
 }
-const hideOrShowElementById = (id,action) =>{
+const hideOrShowElementById = (id,action) => {
     const element = document.getElementById(id);
 
     if (action === SHOW){
@@ -63,6 +66,27 @@ const showPaymentMethodfor = () => {
     }
 }
 
+const determindConflict = (clickedCheckbox) => {
+    const dateAttribute = 'data-day-and-time';
+
+    const recentClickedDateTime = clickedCheckbox.getAttribute(dateAttribute);
+    const recentChecked = clickedCheckbox.checked;
+    const recentCheckboxName = clickedCheckbox.name;
+
+    for (let activity of activitesInputElemets){
+        const activityDateTime = activity.getAttribute(dateAttribute);
+        // if name is the same return false, else return true
+        const isNotSameCheckBox = !(recentCheckboxName === activity.name);
+        if (activity.checked && activityDateTime === recentClickedDateTime && recentChecked && isNotSameCheckBox){
+            activity.parentElement.classList.add('disabled');
+            clickedCheckbox.parentElement.classList.add('disabled');
+        } else if (activity.checked && activityDateTime === recentClickedDateTime && !recentChecked && isNotSameCheckBox){
+            activity.parentElement.classList.remove('disabled');
+            clickedCheckbox.parentElement.classList.remove('disabled');
+        }
+    }
+}
+
 // +++++++++++++++++++++++++++++++++++ validators +++++++++++++++++++++++++++++++++++++++++++++
 const nameValidator = () => {
     console.log('++++++++++++ Name Validator ++++++++++++');
@@ -92,7 +116,7 @@ const emailValidator = () => {
     return emailIsValid;
 }
 
-const activitiesValidator = () =>{
+const activitiesValidator = () => {
     const isValid = STATE.activitiesCost > 0 || false;
     if(isValid){
         hideOrShowElementById(ACTIVITIESHINT, HIDE)
@@ -152,7 +176,8 @@ hideOrShowElementById(OTHERJOBROLE,HIDE);
 getElementById('payment').value = CREDITCARD;
 showPaymentMethodfor();
 
-// Title section control
+// Get Elements
+const nameInfo = getElementById('name');
 const jobSection = getElementById('title');
 const shirtDesigns = getElementById('shirt-designs');
 const designOptions = getElementById('color');
@@ -162,6 +187,9 @@ const displayTotal = getElementById('activities-cost');
 const payment = getElementById('payment');
 const form = document.querySelector("form");
 
+nameInfo.addEventListener('blur',(e) => {
+    nameValidator();
+});
 
 jobSection.addEventListener('change',(e) => {
     console.log('++++++++++++ Job Section ++++++++++++')
@@ -191,6 +219,7 @@ activities.addEventListener('change',(e) => {
     const checkBox = e.target;
     const isChecked = checkBox.checked;
     console.log('activity: ', checkBox.name);
+    determindConflict(checkBox);
     // get current cost of activity 
     const cost = +checkBox.getAttribute('data-cost');
     displayTotal.innerHTML='';
@@ -202,12 +231,10 @@ for (let input of activitesInputElemets){
     const parentLabel = input.parentElement;
     ['focus','blur'].forEach(action => {
         input.addEventListener(action,(e) => {
-            console.log('++++++++++++ activites Input Focus ++++++++++++');
             if(action === 'focus'){
-                console.log('input element focusing for: ',input.name);
+
                 parentLabel.classList.add('focus');
             }else{
-                console.log('input element blur: ',input.name);
                 parentLabel.classList.remove('focus');
             }
         })

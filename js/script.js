@@ -1,6 +1,7 @@
 // Rohan Swaby
 // Interactive Form
-  
+
+// define constants that maybe reused alot
 const SHOW = 'show';
 const HIDE = 'hide';
 const OTHERJOBROLE = 'other-job-role';
@@ -17,6 +18,7 @@ const STATE = {
     paymentMethod : CREDITCARD,
 };
 
+// helper functions 
 const focusOnElementById = id => {
     console.log('focusing on element with id =', id);
     document.getElementById(id).focus();
@@ -77,6 +79,7 @@ const determindConflict = (clickedCheckbox) => {
         const activityDateTime = activity.getAttribute(dateAttribute);
         // if name is the same return false, else return true
         const isNotSameCheckBox = !(recentCheckboxName === activity.name);
+        // iF another activity is checked with the same date and time, disable 
         if (activity.checked && activityDateTime === recentClickedDateTime && recentChecked && isNotSameCheckBox){
             activity.parentElement.classList.add('disabled');
             clickedCheckbox.parentElement.classList.add('disabled');
@@ -91,7 +94,8 @@ const determindConflict = (clickedCheckbox) => {
 const nameValidator = () => {
     console.log('++++++++++++ Name Validator ++++++++++++');
     const name =  getElementById(NAME);
-    isValid = name.value.trim().length > 0 || false;
+    // if name field is blank or onnly has white spaces return false
+    isValid = name.value.trim().length > 0;
     if(isValid){
         hideOrShowElementById(NAMEHINT,HIDE);
         hideOrShowObviousErrors(NAME,HIDE);
@@ -110,6 +114,13 @@ const emailValidator = () => {
         hideOrShowElementById(EMAILHINT,HIDE);
         hideOrShowObviousErrors('email',HIDE);
     }else{
+        // Conditional error message: if the email field is blank change text of hint
+        let hint = getElementById(EMAILHINT);
+        if(emailValue.length < 1){
+            hint.innerHTML = 'Email address cannot be blank';
+        }else{
+            hint.innerHTML = 'Email address must be formatted correctly';
+        }
         hideOrShowElementById(EMAILHINT,SHOW);
         hideOrShowObviousErrors('email',SHOW);
     }
@@ -139,7 +150,11 @@ const creditCardValidator = () => {
     const masterCardRegx =  /^5[1-5][0-9]{14}$/; 
     const zipRegex = /^\d{5}$/;
     const cvvRegex = /^\d{3}$/;
-
+    // credit card feild should follow one of Visa, Master card or American Express formats to be valid not just 13-16 characters
+    // example:
+    // visa: 4111111111111111 : 16 length, 4642307997554 : 13 digits, 4143618179763 : 13 digits 
+    // MasterCard: 5555555555554444 : 16 length
+    // American Express: 378282246310005 : 15 length
     const isCardNumberValid = visaCardRegex.test(cardNumber) || masterCardRegx.test(cardNumber) || amex.test(cardNumber);
     const isYearValid = isNaN(year); //not needed? 
     const isValidZipCode = zipRegex.test(zip);
@@ -177,7 +192,7 @@ getElementById('payment').value = CREDITCARD;
 showPaymentMethodfor();
 
 // Get Elements
-const nameInfo = getElementById('name');
+const emailInfo = getElementById('email');
 const jobSection = getElementById('title');
 const shirtDesigns = getElementById('shirt-designs');
 const designOptions = getElementById('color');
@@ -187,8 +202,9 @@ const displayTotal = getElementById('activities-cost');
 const payment = getElementById('payment');
 const form = document.querySelector("form");
 
-nameInfo.addEventListener('blur',(e) => {
-    nameValidator();
+// real time updates 
+emailInfo.addEventListener('keyup',(e) => {
+    emailValidator();
 });
 
 jobSection.addEventListener('change',(e) => {
@@ -251,7 +267,6 @@ form.addEventListener('submit', (e) => {
     console.log('++++++++++++ final Form ++++++++++++');
     
     let paymentValidation = true;
-
     if (STATE.paymentMethod === CREDITCARD){
         paymentValidation = creditCardValidator();
     }

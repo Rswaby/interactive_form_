@@ -9,7 +9,7 @@
         ├── index.html           # html doc that renders in the browser
         └── README.md
 
-## real Time error message 
+## Real time error message 
 Field: Email 
 when user starts typing in the email field the error message will show until a valid email address is detected. 
 

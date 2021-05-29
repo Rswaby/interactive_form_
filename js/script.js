@@ -6,6 +6,7 @@ const SHOW = 'show';
 const HIDE = 'hide';
 const OTHERJOBROLE = 'other-job-role';
 const CREDITCARD = 'credit-card';
+const COLORS = 'shirt-colors';
 const PAYPAL = 'paypal';
 const BITCOIN = 'bitcoin';
 const NAME = 'name';
@@ -52,6 +53,8 @@ const hideOrShowObviousErrors = (id,action) => {
     }
 }
 
+// const clearOptions = ()
+
 const showPaymentMethodfor = () => {
     if(STATE.paymentMethod === PAYPAL){
         hideOrShowElementById(PAYPAL,SHOW);
@@ -94,25 +97,30 @@ const determindConflict = (clickedCheckbox) => {
 const nameValidator = () => {
     console.log('++++++++++++ Name Validator ++++++++++++');
     const name =  getElementById(NAME);
-    // if name field is blank or onnly has white spaces return false
-    isValid = name.value.trim().length > 0;
+    // if name field is blank or only has white spaces return false
+    isValid = name.value.trim().length > 0; 
     if(isValid){
-        hideOrShowElementById(NAMEHINT,HIDE);
-        hideOrShowObviousErrors(NAME,HIDE);
+        // if the name field is valid hind the hint and the warning signs
+        hideOrShowElementById(NAMEHINT, HIDE);
+        hideOrShowObviousErrors(NAME, HIDE);
     }else{
+        // if the name field not valid show the hint and the warning sign
         hideOrShowElementById(NAMEHINT, SHOW);
-        hideOrShowObviousErrors(NAME,SHOW);
+        // show warning on pareent element
+        hideOrShowObviousErrors(NAME, SHOW);
     }
-    console.log('isNameValid : ',isValid)
+    console.log('isNameValid : ', isValid);
     return isValid;
 }
 const emailValidator = () => {
     const emailValue = String(getElementById('email').value);
+    // determind if emailValue is formated as "example@.[com,net,org..]"
     const emailIsValid = /^[^@]+@[^@.]+\.[a-z]+$/i.test(emailValue);
 
     if(emailIsValid){
-        hideOrShowElementById(EMAILHINT,HIDE);
-        hideOrShowObviousErrors('email',HIDE);
+        // if the email field not valid show the hint and the warning sign
+        hideOrShowElementById(EMAILHINT, HIDE);
+        hideOrShowObviousErrors('email', HIDE);
     }else{
         // Conditional error message: if the email field is blank change text of hint
         let hint = getElementById(EMAILHINT);
@@ -121,20 +129,25 @@ const emailValidator = () => {
         }else{
             hint.innerHTML = 'Email address must be formatted correctly';
         }
+        // if the email field not valid show the hint and the warning sign
         hideOrShowElementById(EMAILHINT,SHOW);
+        // show warning on pareent element
         hideOrShowObviousErrors('email',SHOW);
     }
     return emailIsValid;
 }
 
 const activitiesValidator = () => {
+    // if cost is 0 that means no activities were selected 
     const isValid = STATE.activitiesCost > 0 || false;
     if(isValid){
-        hideOrShowElementById(ACTIVITIESHINT, HIDE)
-        hideOrShowObviousErrors(ACTIVITIESHINT,HIDE) //since parent of acitvities hint is feildset
+        hideOrShowElementById(ACTIVITIESHINT, HIDE);
+        // hide error warning on parent element 
+        hideOrShowObviousErrors(ACTIVITIESHINT, HIDE); 
     } else {
-        hideOrShowElementById(ACTIVITIESHINT, SHOW)
-        hideOrShowObviousErrors(ACTIVITIESHINT,SHOW) //since parent of acitvities hint is feildset
+        hideOrShowElementById(ACTIVITIESHINT, SHOW);
+        // show error warning on parent element 
+        hideOrShowObviousErrors(ACTIVITIESHINT,SHOW); 
     }
     return isValid;
 }
@@ -155,23 +168,28 @@ const creditCardValidator = () => {
     // visa: 4111111111111111 : 16 length, 4642307997554 : 13 digits, 4143618179763 : 13 digits 
     // MasterCard: 5555555555554444 : 16 length
     // American Express: 378282246310005 : 15 length
+    // either of 
     const isCardNumberValid = visaCardRegex.test(cardNumber) || masterCardRegx.test(cardNumber) || amex.test(cardNumber);
     const isYearValid = isNaN(year); //not needed? 
     const isValidZipCode = zipRegex.test(zip);
     const isValidCvv = cvvRegex.test(cvv);
     // cc-num
     if(isCardNumberValid){
+        // if card number is one of the valid card format hide the error messages and hints
         hideOrShowElementById(CREDITCARDHINTS.card,HIDE);
         hideOrShowObviousErrors(CREDITCARDHINTS.card, HIDE);
     }else{
+        // if card number is NOT one of the valid card format show the error messages and hints
         hideOrShowElementById(CREDITCARDHINTS.card,SHOW);
         hideOrShowObviousErrors(CREDITCARDHINTS.card, SHOW);
     }
     // cc-zip
     if(isValidZipCode){
+         // if zip code is valid  hide the error messages and hints
         hideOrShowElementById(CREDITCARDHINTS.zip,HIDE);
         hideOrShowObviousErrors(CREDITCARDHINTS.zip,HIDE);
     }else{
+        // if zip code is valid  show the error messages and hints
         hideOrShowElementById(CREDITCARDHINTS.zip,SHOW);
         hideOrShowObviousErrors(CREDITCARDHINTS.zip,SHOW);
     }
@@ -188,6 +206,7 @@ const creditCardValidator = () => {
 // defaults 
 focusOnElementById(NAME);
 hideOrShowElementById(OTHERJOBROLE,HIDE);
+hideOrShowElementById(COLORS,HIDE);
 getElementById('payment').value = CREDITCARD;
 showPaymentMethodfor();
 
@@ -221,13 +240,21 @@ jobSection.addEventListener('change',(e) => {
 shirtDesigns.addEventListener('change',(e) => {
     console.log('++++++++++++ shirt-designs ++++++++++++');
     let currentSelection = e.target.value;
-    for (let option of designOptions){
-        if(option.dataset.theme === currentSelection){
-            option.style.display = 'block';
-        } else {
-            option.style.display = 'none';
+    const color = getElementById('color');
+    let defaultSelectIndex = -1;
+    for (let i=0; i < designOptions.length; i++){
+        if(designOptions[i].dataset.theme === currentSelection){
+            hideOrShowElementById(COLORS,SHOW);
+            designOptions[i].style.display = 'block';
+            // Select index of 
+            if(defaultSelectIndex === -1){
+                defaultSelectIndex = i;
+            }
+        }else {
+            designOptions[i].style.display = 'none';
         }
     }
+    color.selectedIndex = defaultSelectIndex;
 });
 
 activities.addEventListener('change',(e) => {

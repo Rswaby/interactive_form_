@@ -42,6 +42,8 @@ const hideOrShowElementById = (id,action) => {
     }
 };
 
+// used to add and remove the 'not-valid' class Name from elements used to display warnings to the user. 
+// it is called in all the validator functions with id of element to hide or show with a action flag. 
 const hideOrShowObviousErrors = (id,action) => {
     const parentElement = getElementById(id).parentElement;
     if (action === SHOW){
@@ -53,8 +55,10 @@ const hideOrShowObviousErrors = (id,action) => {
     }
 }
 
-// const clearOptions = ()
-
+// depending on the currently selected payment method
+// hide all other payment methods
+// this is called when there is a change in the payment section of the form
+// STATE.paymentMethod = e.target.value  
 const showPaymentMethodfor = () => {
     if(STATE.paymentMethod === PAYPAL){
         hideOrShowElementById(PAYPAL,SHOW);
@@ -70,7 +74,8 @@ const showPaymentMethodfor = () => {
         hideOrShowElementById(BITCOIN,SHOW);
     }
 }
-
+// called using eventlistener on activites when there is a 'change' 
+// passing in clickedCheckbox as e.target;
 const determindConflict = (clickedCheckbox) => {
     const dateAttribute = 'data-day-and-time';
 
@@ -82,14 +87,18 @@ const determindConflict = (clickedCheckbox) => {
         const activityDateTime = activity.getAttribute(dateAttribute);
         // if name is the same return false, else return true
         const isNotSameCheckBox = !(recentCheckboxName === activity.name);
-        // iF another activity is checked with the same date and time, disable 
-        if (activity.checked && activityDateTime === recentClickedDateTime && recentChecked && isNotSameCheckBox){
-            activity.parentElement.classList.add('disabled');
-            clickedCheckbox.parentElement.classList.add('disabled');
-        } else if (activity.checked && activityDateTime === recentClickedDateTime && !recentChecked && isNotSameCheckBox){
-            activity.parentElement.classList.remove('disabled');
-            clickedCheckbox.parentElement.classList.remove('disabled');
+        if ((activityDateTime === recentClickedDateTime) && isNotSameCheckBox){
+            if(recentChecked){
+                console.log("conflict detected");
+                activity.parentElement.classList.add('disabled');
+                activity.disabled = true;
+            }else{
+                console.log("removing conflict");
+                activity.parentElement.classList.remove('disabled');
+                activity.disabled = false;
+            }
         }
+
     }
 }
 
@@ -163,12 +172,12 @@ const creditCardValidator = () => {
     const masterCardRegx =  /^5[1-5][0-9]{14}$/; 
     const zipRegex = /^\d{5}$/;
     const cvvRegex = /^\d{3}$/;
-    // credit card feild should follow one of Visa, Master card or American Express formats to be valid not just 13-16 characters
-    // example:
-    // visa: 4111111111111111 : 16 length, 4642307997554 : 13 digits, 4143618179763 : 13 digits 
-    // MasterCard: 5555555555554444 : 16 length
-    // American Express: 378282246310005 : 15 length
-    // either of 
+    /* credit card feild should follow one of Visa, Master card or American Express formats to be valid not just 13-16 characters
+       example:
+    visa: 4111111111111111 : 16 length, 4642307997554 : 13 digits, 4143618179763 : 13 digits 
+    MasterCard: 5555555555554444 : 16 length
+    American Express: 378282246310005 : 15 length 
+    */ 
     const isCardNumberValid = visaCardRegex.test(cardNumber) || masterCardRegx.test(cardNumber) || amex.test(cardNumber);
     const isYearValid = isNaN(year); //not needed? 
     const isValidZipCode = zipRegex.test(zip);
@@ -203,10 +212,10 @@ const creditCardValidator = () => {
     }
     return isCardNumberValid && isValidZipCode && isCvv;
 }
-// defaults 
+// set the default requirements when user first loads the page
 focusOnElementById(NAME);
 hideOrShowElementById(OTHERJOBROLE,HIDE);
-hideOrShowElementById(COLORS,HIDE);
+getElementById(COLORS).disabled = true;
 getElementById('payment').value = CREDITCARD;
 showPaymentMethodfor();
 
@@ -221,11 +230,13 @@ const displayTotal = getElementById('activities-cost');
 const payment = getElementById('payment');
 const form = document.querySelector("form");
 
-// real time updates 
+designOptions.disabled = true;
+// real time updates for email field. 
 emailInfo.addEventListener('keyup',(e) => {
     emailValidator();
 });
-
+// when there is a change in the job section drop down 
+// determind wether to hind or show the other job input field. 
 jobSection.addEventListener('change',(e) => {
     console.log('++++++++++++ Job Section ++++++++++++')
     let currentSelection = e.target.value;
@@ -241,12 +252,15 @@ shirtDesigns.addEventListener('change',(e) => {
     console.log('++++++++++++ shirt-designs ++++++++++++');
     let currentSelection = e.target.value;
     const color = getElementById('color');
+    // set disabled to false if and only if it's 
+    if (designOptions.disabled === true){
+        designOptions.disabled = false;
+    }
     let defaultSelectIndex = -1;
     for (let i=0; i < designOptions.length; i++){
         if(designOptions[i].dataset.theme === currentSelection){
-            hideOrShowElementById(COLORS,SHOW);
             designOptions[i].style.display = 'block';
-            // Select index of 
+        
             if(defaultSelectIndex === -1){
                 defaultSelectIndex = i;
             }
@@ -254,22 +268,44 @@ shirtDesigns.addEventListener('change',(e) => {
             designOptions[i].style.display = 'none';
         }
     }
+    /* if no default option is set, 
+       go ahead and set it based on the index of first item
+       from each set of options js-puns vs heart js.
+
+         exmample:
+        if currentSelection = js puns 
+        set default option to cornflowerblue
+
+        if currenSelection = heart js 
+        set default option to tomato
+   */
     color.selectedIndex = defaultSelectIndex;
 });
 
 activities.addEventListener('change',(e) => {
     console.log('++++++++++++ activites ++++++++++++');
     const checkBox = e.target;
-    const isChecked = checkBox.checked;
     console.log('activity: ', checkBox.name);
-    determindConflict(checkBox);
     // get current cost of activity 
     const cost = +checkBox.getAttribute('data-cost');
     displayTotal.innerHTML='';
-    isChecked ? STATE.activitiesCost += cost : STATE.activitiesCost -= cost;
-    displayTotal.innerHTML = `Total: $${STATE.activitiesCost}`;    
+    /* if the checkBox.checked === true then add to current total 
+      if checkBox.checked === false subtract 'data-cost' amount from currentTotal
+      this will not go below 0 because for checkBox.checked to be false then it must have been true 
+      the first time this check box was clicked and already added to the total.  
+     */
+    checkBox.checked ? STATE.activitiesCost += cost : STATE.activitiesCost -= cost;
+    displayTotal.innerHTML = `Total: $${STATE.activitiesCost}`; 
+     /* 
+      Determine if there is another event with conflicting date and time.
+      disable the other contlicting checck box
+    */ 
+     determindConflict(checkBox);   
 });
-
+/**
+ * For each activitty input field, 
+ * if the user tabs over them we highlight the current checkbox on focus. 
+ */
 for (let input of activitesInputElemets){
     const parentLabel = input.parentElement;
     ['focus','blur'].forEach(action => {
